@@ -5,9 +5,9 @@ Install [KickAssembler](http://theweb.dk/KickAssembler/Main.html#frontpage) to b
 
 Install [VICE](https://vice-emu.sourceforge.io/) to run the built project or to run Bin/Engine.prg.
 
-Install [CharPad](https://subchristsoftware.itch.io/charpad-free-edition) to view the background char tile map file in the Assets folder.
+Install [CharPad](https://subchristsoftware.itch.io/charpad-free-edition) to view the background char tile map file in the Assets folder (from the game IO).
 
-Install [SpritePad](https://subchristsoftware.itch.io/spritepad-pro) to view the sprites file in the Assets folder.
+Install [SpritePad](https://subchristsoftware.itch.io/spritepad-pro) to view the sprites file in the Assets folder (from the game Armalyte).
 
 Use this command line to build the project in the Source folder:
 `java -jar C:\C64\Tools\KickAssembler\kickass.jar Main.asm`
