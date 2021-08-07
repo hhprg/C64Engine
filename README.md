@@ -12,7 +12,7 @@ Install [SpritePad](https://subchristsoftware.itch.io/spritepad-pro) to view the
 Use this command line to build the project in the Source folder:
 `java -jar C:\C64\Tools\KickAssembler\kickass.jar Main.asm`
 
-The included CTMConverter tool in the Tools folder can be used to convert a CharPad file to an assembly source file for the engine.
+The included CTMConverter tool in the Tools folder can be used to convert a CharPad file to an assembly source file for the engine.   
 Usage: `CTMConverter <CharPad project input filename> <Engine output filename>`    
 For example: `CTMConverter IO_L2_PerCharColor_HiresTest.ctm GameCharTileMap.asm`
 
