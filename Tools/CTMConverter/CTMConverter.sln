@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31025.194
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CTMConverter", "CTMConverter\CTMConverter.csproj", "{07F1686D-2658-4B03-A397-F5D1C4DAF57F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{07F1686D-2658-4B03-A397-F5D1C4DAF57F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07F1686D-2658-4B03-A397-F5D1C4DAF57F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07F1686D-2658-4B03-A397-F5D1C4DAF57F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07F1686D-2658-4B03-A397-F5D1C4DAF57F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B504E95F-9579-4BAB-9066-0D6DBA5EE727}
+	EndGlobalSection
+EndGlobal
