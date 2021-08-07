@@ -3,7 +3,7 @@ Partially finished C64 game engine.
 
 Install [KickAssembler](http://theweb.dk/KickAssembler/Main.html#frontpage) to build the project.
 
-Install [VICE](https://vice-emu.sourceforge.io/) to run the built project or to run Bin/Engine.prg.
+Install [VICE](https://vice-emu.sourceforge.io/) to run the built project or to run Bin/Engine.prg (sys 2112 to start).
 
 Install [CharPad](https://subchristsoftware.itch.io/charpad-free-edition) to view the background char tile map file in the Assets folder (from the game IO).
 
