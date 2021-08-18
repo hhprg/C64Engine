@@ -1,5 +1,6 @@
 # C64Engine
-Partially finished C64 game engine.
+Partially finished C64 game engine.   
+Load Bin/Engine.prg in [VICE](https://vice-emu.sourceforge.io/) and type 'sys 2112' to run the demo.
 
 ### Technical information and limitations
 * Full screen bi-directional side scrolling (currently scrolls max 1 pixel per frame).
@@ -7,7 +8,7 @@ Partially finished C64 game engine.
 * Supports up to 1024 unique characters. Each character can be flipped/mirrored in x and y for a max total of 4096 characters. Max 256 unique characters can be on screen at any given time. The demo has max 249 unique characters on screen.
 * Supports up to 1024 unique tiles. Each tile can be flipped/mirrored in x and y for a max total of 4096 tiles.
 * Color per character and full screen color scroll. Max 256 character colors on the screen can move/scroll at any given time. The demo scrolls max 136 character colors.
-* The actual max number of colored characters may be less than 4096, for example when using multiple colors for the same character data. This is due to how the engine stores tile data for simple run-time access. 
+* The actual max number of colored characters may be less than 4096 in practice, for example when using multiple colors for the same character data. This is due to how the engine currently stores tile data to save memory. This limitation can be worked around at the cost of higher memory usage. 
 * Sprite multiplexer supports 24 sprites but the number of sprites can be increased (performance permitting).
 * Sprites can be in 3 different layers (depths / "z"). The demo uses this in the section where overlapping sprites are moving in opposite directions in a circle.
 * Simple sprite vs sprite box collision detection. No sprite vs character collision detection.
