@@ -1,5 +1,5 @@
 # C64Engine
-Partially finished C64 game engine.   
+Partially finished C64 (PAL) game engine.   
 Load Bin/Engine.prg in [VICE](https://vice-emu.sourceforge.io/) and type 'sys 2112' to run the demo.
 
 ### Technical information and limitations
