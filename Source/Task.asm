@@ -155,7 +155,7 @@ ListOffsets:
 
 //
 
-.segment BSS2 "TaskManager data"
+.segment BSS2 "Task data"
 
 IsListActive:
 .fill kNumPriorities, 0
