@@ -1,6 +1,7 @@
 # C64Engine
 Partially finished C64 (PAL) game engine.   
-Load Bin/Engine.prg in [VICE](https://vice-emu.sourceforge.io/) and type 'sys 2112' to run the demo.
+Load Bin/Engine.prg in [VICE](https://vice-emu.sourceforge.io/) and type 'sys 2112' to run the demo.  
+Watch demo on [YouTube](https://youtu.be/2h9QYfHjf18).
 
 ### Technical information and limitations
 * Full screen bi-directional side scrolling (currently scrolls max 1 pixel per frame).
