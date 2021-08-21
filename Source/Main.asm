@@ -213,6 +213,10 @@
                     lda ScreenMemHi,x
                     sta Multiplexer.IRQHandler.Add.ScreenMemHi
                     sta Multiplexer.EndFrame.Add.ScreenMemHi
+
+                    lda Camera.FineScroll
+                    ora #%00010000 // 38-column mode, enable multicolor 
+                    sta $d016
                
         .if (ShowRasterTime) inc $d020
                     jsr Multiplexer.EndFrame
@@ -221,10 +225,6 @@
                     //sta $d011
                     lda #$ff
                     sta $d015
-
-                    lda Camera.FineScroll
-                    ora #%00010000 // 38-column mode, enable multicolor 
-                    sta $d016
                
         .if (ShowRasterTime)
         {
