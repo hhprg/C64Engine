@@ -107,37 +107,36 @@ Update:
     Exit:       rts
    
                 // Start processing task list.
-    ProcessList:inc IsListActive,x
+    ProcessList:sta IsListActive,x // Non-zero means active.
     NextTask:   dec ListLengths,x
                 lda ListHeads,x
+                inc ListHeads,x // Move head one step forward.
+                cli // Allow interrupts since task may span several frames.
                 anc #kMaxListLength - 1
                 adc ListOffsets,x
                 tay
 
-                // Move head one step forward.
-                inc ListHeads,x
                 txa
                 pha
                 lda CodeAdrHi,y
                 pha
                 lda CodeAdrLo,y
                 pha
-                cli // Allow interrupts since task may span several frames.
 
                 // Execute task (jmp).
                 rts
             
     ReturnFromTask:
-                sei // Disable interrupts in this critical section.
                 pla
                 tax
-            
+                sei // Disable interrupts in this critical section.
+
                 // Process next task in list, if any.
                 lda ListLengths,x
                 bne NextTask
 
                 // Done processing task list.
-                dec IsListActive,x
+                sta IsListActive,x // Zero means not active.
 
                 // Process next lower priority task list.
                 dex
