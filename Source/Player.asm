@@ -487,16 +487,13 @@ UpdateCollision:
                 bcs CenterIndex
                 lda #kNumCollisionChecks / 2
                 sec
-    CenterIndex:adc #kNumCollisionChecks / 2 // c = 1
+    CenterIndex:sbc #kNumCollisionChecks / 2 // c = 1
+                tay
+                adc #kNumCollisionChecks     // c = 1
                 cmp Multiplexer.NumVirSprites                        
                 bcc StopIndex
                 lda Multiplexer.NumVirSprites
-                clc
     StopIndex:  sta Stop               
-                sbc #kNumCollisionChecks // c = 0
-                bcs StartIndex
-                lda #0
-    StartIndex: tay               
             
     Next:       ldx Multiplexer.zpSortedVirSprites,y
    
