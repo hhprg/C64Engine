@@ -485,9 +485,8 @@ UpdateCollision:
                 txa
                 cmp #kNumCollisionChecks / 2
                 bcs CenterIndex
-                lda #kNumCollisionChecks / 2
-                sec
-    CenterIndex:sbc #kNumCollisionChecks / 2 // c = 1
+                lda #kNumCollisionChecks / 2 + 1 // c = 0
+    CenterIndex:sbc #kNumCollisionChecks / 2
                 tay
                 adc #kNumCollisionChecks     // c = 1
                 cmp Multiplexer.NumVirSprites                        
