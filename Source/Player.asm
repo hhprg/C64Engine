@@ -483,16 +483,20 @@ UpdateCollision:
                 
                 // Greedy checks, only check against vir sprites within N (sorted) indices.
                 txa
-                adc #(kNumCollisionChecks / 2 - 1) // c = 1
-                tax
+                cmp #kNumCollisionChecks / 2
+                bcs CenterIndex
+                lda #kNumCollisionChecks / 2
+                sec
+    CenterIndex:adc #kNumCollisionChecks / 2 // c = 1
+                cmp Multiplexer.NumVirSprites                        
+                bcc StopIndex
+                lda Multiplexer.NumVirSprites
+                clc
+    StopIndex:  sta Stop               
                 sbc #kNumCollisionChecks // c = 0
-                bcs Bottom
+                bcs StartIndex
                 lda #0
-    Bottom:     tay               
-                cpx Multiplexer.NumVirSprites                        
-                bcc Top
-                ldx Multiplexer.NumVirSprites
-    Top:        stx Stop               
+    StartIndex: tay               
             
     Next:       ldx Multiplexer.zpSortedVirSprites,y
    
