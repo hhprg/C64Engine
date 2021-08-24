@@ -62,15 +62,15 @@
     .eval levelAnimations.add(AnimationInstance("Circle (100, 90, 320), 11 spr, enemy1 lightred", 1112, 0, 0, kFlipY))
 
     .eval levelAnimations.add(AnimationInstance("LetterH", 1600, 0, 0, 0))
-    .eval levelAnimations.add(AnimationInstance("LetterE", 1758, 0, 0, 16))
-    .eval levelAnimations.add(AnimationInstance("LetterL", 1916, 0, 0, 32))
-    .eval levelAnimations.add(AnimationInstance("LetterL", 2074, 0, 0, 48))
-    .eval levelAnimations.add(AnimationInstance("LetterO", 2232, 0, 0, 64))
+    .eval levelAnimations.add(AnimationInstance("LetterE", 1766, 0, 0, 16))
+    .eval levelAnimations.add(AnimationInstance("LetterL", 1932, 0, 0, 32))
+    .eval levelAnimations.add(AnimationInstance("LetterL", 2098, 0, 0, 48))
+    .eval levelAnimations.add(AnimationInstance("LetterO", 2264, 0, 0, 64))
 
-    .eval levelAnimations.add(AnimationInstance("BigBossAI", 2650, 0, 0, 0))
+    .eval levelAnimations.add(AnimationInstance("BigBossAI", 2722, 0, 0, 0))
 
-    .eval levelAnimations.add(AnimationInstance("MiniBossAI", 3240,  10, 2,  0))
-    .eval levelAnimations.add(AnimationInstance("MiniBossAI", 3240, 104, 2, 64))
+    .eval levelAnimations.add(AnimationInstance("MiniBossAI", 3312,  10, 2,  0))
+    .eval levelAnimations.add(AnimationInstance("MiniBossAI", 3312, 104, 2, 64))
 
     // Add list of level animations to list of all levels' animations.
     .eval AnimationsPerLevel.add(levelAnimations)

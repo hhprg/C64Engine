@@ -451,7 +451,9 @@ UpdateCollision:
                 and #kCanCollide
                 bne Update
                 rts
+
     Update:     ldx VirSpriteIndex
+                ldy #0
                 lda Multiplexer.zpVirSpritePosY,x
                 clc
                 adc #kCollisionDistanceY
@@ -462,8 +464,8 @@ UpdateCollision:
                 lda Multiplexer.VirSpritePosXLo,x
                 adc #kCollisionDistanceX // c = 1
                 sta MaxXLo
-                lda Multiplexer.VirSpritePosXHi,x
-                adc #0
+                tya
+                adc Multiplexer.VirSpritePosXHi,x
                 sta MaxXHi
                 lda Multiplexer.VirSpritePosXLo,x
                 sbc #(kCollisionDistanceX - 1) // c = 0
@@ -471,12 +473,17 @@ UpdateCollision:
                 lda Multiplexer.VirSpritePosXHi,x
                 sbc #0
                 bcs SetMinX
-                lda #0     // Clamp MinX to 0.
-                sta MinXLo
+                tya
+                sta MinXLo // Clamp MinX to 0.
     SetMinX:    sta MinXHi
             
                 txa
                 ldx Multiplexer.NumVirSprites
+                stx Stop
+                cpx #kNumCollisionChecks + 2 // Check against all sprites if few enough.
+                bcc Next
+
+                // Find (sorted) index of player sprite.
     Prev:       dex
                 cmp Multiplexer.zpSortedVirSprites,x         
                 bne Prev 
@@ -485,14 +492,15 @@ UpdateCollision:
                 txa
                 cmp #kNumCollisionChecks / 2
                 bcs CenterIndex
-                lda #kNumCollisionChecks / 2 + 1 // c = 0
-    CenterIndex:sbc #kNumCollisionChecks / 2
-                tay
-                adc #kNumCollisionChecks     // c = 1
+                lda #kNumCollisionChecks / 2 + 1
+    CenterIndex:adc #kNumCollisionChecks / 2 // c = 1
                 cmp Multiplexer.NumVirSprites                        
                 bcc StopIndex
                 lda Multiplexer.NumVirSprites
+                clc
     StopIndex:  sta Stop               
+                sbc #kNumCollisionChecks // c = 0
+                tay
             
     Next:       ldx Multiplexer.zpSortedVirSprites,y
    
