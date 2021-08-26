@@ -523,60 +523,43 @@ Finalize:
 {
                 ldx #0
                 ldy #0
+                sty EndIndex
                 sty ColumnOffset
 
-                // Index of first element of column indices for this row.
-                sty StartIndex
-            
-    NextRow:    lda EndIndexPerRow,y
-                cmp StartIndex
+    NextRow:    lda EndIndexPerRow,x
+                cmp EndIndex
                 beq RowDone // No colors to move for this row.
                
                 // Index of the end of this row's list.
                 sta EndIndex
 
-                // Keep screen row.
-                sty ScreenRow               
-
-                ldy StartIndex:#0
+    NextClc:    clc
     Next:       lda (zpColumnIndicesLo),y
-                clc // Needed because EndIndex can be 0.
                 adc ColumnOffset:#0
             
                 // Flattened index = column index + offset of block row's first column (0, 40, 80 etc.)
                 // Add flattened index to block list. 
     .label FinalizedColumnIndicesLo = *+1
     .label FinalizedColumnIndicesHi = *+2
-                sta kDefaultAdr,x
-                inx
+                sta kDefaultAdr,y
                 iny
                 cpy EndIndex:#0
-                bne Next
-
-                // This row's end index is next row's start index.
-                sty StartIndex
-
-                // Recover screen row.
-                ldy ScreenRow:#0
+                bcc Next
+                bne NextClc // Needed because end index can be 0 (if moving 256 colors).
 
                 // On to next row in block.
-    RowDone:    iny
-                cpy #kNumScreenScrollRows
+    RowDone:    inx
+                cpx #kNumScreenScrollRows
                 bcs Done
 
-                lda ColumnOffset
-                adc #kNumScreenColumns // Color memory offset of next row.
-                cmp #kNumBlockRows * kNumScreenColumns
-                bne NotDone         
+                lda BlockColumnOffsets,x
+                sta ColumnOffset
+                bne NextRow
             
     Done:       // Block done, keep end index per block.
-                txa         
+                tya
                 pha
-                lda #0               
-            
-    NotDone:    sta ColumnOffset
-                cpy #kNumScreenScrollRows
-                bne NextRow
+                bcc NextRow
             
                 // Extract block row end indices.
                 ldy #kNumBlocks
@@ -615,9 +598,12 @@ NumBlockRows:
     .byte kNumBlockRows - 1
 .byte kNumScreenScrollRows - (kNumBlocks - 1) * kNumBlockRows - 1
 
+BlockColumnOffsets:
 RowOffsets:      
 .for (var i = 0; i < kNumBlockRows; i++)
     .byte i * kNumScreenColumns 
+.for (var i = kNumBlockRows; i < kNumScreenScrollRows; i++)
+    .byte mod(i, kNumBlockRows) * kNumScreenColumns
    
 RowOffsetsPlus37:      
 .for (var i = 0; i < kNumBlockRows; i++)
