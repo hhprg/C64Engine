@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace CTM
 {
@@ -23,10 +24,18 @@ namespace CTM
          PerCharacter
       };
 
+      public enum ScreenMode
+      {
+         Hires,
+         MultiColor,
+         ExtendedColor
+      };
+
       public byte[] FileId = new byte[3];
       public byte Version;
-      public byte[] Colors = new byte[4];
-      public byte colorMethod;
+      public byte[] Colors = new byte[5];
+      public ColorMethod colorMethod;
+      public ScreenMode screenMode = ScreenMode.MultiColor;
       public byte Flags;
       public Int16 NumChars; // Number of characters
       public Int16 NumTiles; // Number of tiles
@@ -39,6 +48,8 @@ namespace CTM
       public byte[] CharAttributes;
       public Int16[] TileData;
       public byte[] TileColors;
+      public byte[] TileTags;
+      public string[] TileNames;
       public Int16[] MapData;
 
       public byte GetCharColor(int charIndex)
@@ -73,56 +84,93 @@ namespace CTM
 
                   reader.Read(FileId, 0, 3);
                   Version = reader.ReadByte();
-                  reader.Read(Colors, 0, 4);
-                  colorMethod = reader.ReadByte();
-                  Flags = reader.ReadByte();
 
-                  bool hasTiles = (Flags & 1) != 0;
-                  bool hasExpandedData = (Flags & 2) != 0;
-
-                  Debug.Assert(!hasExpandedData, "Expanded data not supported.");
-
-                  if (!hasExpandedData)
+                  if (Version == 7)
                   {
-                     NumChars = reader.ReadInt16();
-                     if (NumChars >= 0)
+                     reader.Read(Colors, 0, Colors.Length);
+                     colorMethod = (ColorMethod)reader.ReadByte();
+                     screenMode = (ScreenMode)reader.ReadByte();
+
+                     if (screenMode != ScreenMode.ExtendedColor)
                      {
-                        NumChars++;
-                     }
-                     NumTiles = reader.ReadInt16();
-                     if (NumTiles >= 0)
-                     {
-                        NumTiles++;
-                     }
-                     TileWidth = reader.ReadByte();
-                     TileHeight = reader.ReadByte();
-                     MapWidth = reader.ReadInt16();
-                     MapHeight = reader.ReadInt16();
+                        Flags = reader.ReadByte();
 
-                     CharData = new byte[NumChars * 8];
-                     reader.Read(CharData, 0, NumChars * 8);
-                     CharAttributes = new byte[NumChars];
-                     reader.Read(CharAttributes, 0, NumChars);
+                        bool isTileSystemEnabled = (Flags & 1) != 0;
 
-                     TileData = new Int16[NumTiles * TileWidth * TileHeight];
-                     MapData = new Int16[MapWidth * MapHeight];
-
-                     if (hasTiles)
-                     {
-                        ReadInt16s(ref TileData, reader);
-
-                        if (colorMethod == (byte)ColorMethod.PerTile)
+                        if (isTileSystemEnabled)
                         {
-                           TileColors = new byte[NumTiles];
-                           reader.Read(TileColors, 0, NumTiles);
+                           // Character data block.
+                           ReadBlockMarker(reader);
+
+                           NumChars = reader.ReadInt16();
+                           if (NumChars >= 0)
+                           {
+                              NumChars++;
+                           }
+
+                           CharData = new byte[NumChars * 8];
+                           reader.Read(CharData, 0, NumChars * 8);
+
+                           // Character attributes block.
+                           CharAttributes = new byte[NumChars];
+                           ReadBlockMarker(reader);
+                           reader.Read(CharAttributes, 0, NumChars);
+
+                           // Tile data block.
+                           ReadBlockMarker(reader);
+                           NumTiles = reader.ReadInt16();
+                           if (NumTiles >= 0)
+                           {
+                              NumTiles++;
+                           }
+                           TileWidth = reader.ReadByte();
+                           TileHeight = reader.ReadByte();
+                           TileData = new Int16[NumTiles * TileWidth * TileHeight];
+                           ReadInt16s(ref TileData, reader);
+
+                           // Tile colors block.
+                           if (colorMethod == ColorMethod.PerTile)
+                           {
+                              TileColors = new byte[NumTiles];
+                              ReadBlockMarker(reader);
+                              reader.Read(TileColors, 0, NumTiles);
+                           }
+
+                           // Tile tags block.
+                           TileTags = new byte[NumTiles];
+                           ReadBlockMarker(reader);
+                           reader.Read(TileTags, 0, NumTiles);
+
+                           // Tile names block.
+                           ASCIIEncoding ascii = new ASCIIEncoding();
+                           byte[] name = new byte[32];
+                           TileNames = new string[NumTiles];
+                           ReadBlockMarker(reader);
+                           for (int i = 0; i < NumTiles; i++)
+                           {
+                              TileNames[i] = ReadASCIIString(reader, ascii, name);
+                           }
+
+                           // Map data block.
+                           ReadBlockMarker(reader);
+                           MapWidth = reader.ReadInt16();
+                           MapHeight = reader.ReadInt16();
+                           MapData = new Int16[MapWidth * MapHeight];
+                           ReadInt16s(ref MapData, reader);
+                        }
+                        else
+                        {
+                           Console.Error.WriteLine("Tile system is not enabled.");
                         }
                      }
-
-                     ReadInt16s(ref MapData, reader);
+                     else
+                     {
+                        Console.Error.WriteLine("Extended color mode data not supported.");
+                     }
                   }
                   else
                   {
-                     Console.Error.WriteLine("Expanded data not supported.");
+                     Console.Error.WriteLine("CharPad file format version " + Version + " is not supported (only version 7 is supported).");
                   }
                }
             }
@@ -187,28 +235,58 @@ namespace CTM
             if (stream != null)
             {
                BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8);
+               byte blockIndex = 0;
+               bool isTileSystemEnabled = (Flags & 1) != 0;
 
                writer.Write(FileId);
                writer.Write(Version);
                writer.Write(Colors);
-               writer.Write(colorMethod);
+               writer.Write((byte)colorMethod);
+               writer.Write((byte)screenMode);
                writer.Write(Flags);
-               WriteInt16((Int16)(NumChars - 1), writer);
-               WriteInt16((Int16)(NumTiles - 1), writer);
-               writer.Write(TileWidth);
-               writer.Write(TileHeight);
-               WriteInt16(MapWidth, writer);
-               WriteInt16(MapHeight, writer);
 
+               // Character data block.
+               WriteBlockMarker(writer, blockIndex++);
+               WriteInt16((Int16)(NumChars - 1), writer);
                writer.Write(CharData);
+
+               // Character attributes block.
+               WriteBlockMarker(writer, blockIndex++);
                writer.Write(CharAttributes);
 
-               bool hasTiles = (Flags & 1) != 0;
-               if (hasTiles)
+               if (isTileSystemEnabled)
                {
+                  // Tile data block.
+                  WriteBlockMarker(writer, blockIndex++);
+                  WriteInt16((Int16)(NumTiles - 1), writer);
+                  writer.Write(TileWidth);
+                  writer.Write(TileHeight);
                   WriteInt16s(TileData, writer);
-                  writer.Write(TileColors);
+
+                  // Tile colors block.
+                  if (colorMethod == ColorMethod.PerTile)
+                  {
+                     WriteBlockMarker(writer, blockIndex++);
+                     writer.Write(TileColors);
+                  }
+
+                  // Tile tags block.
+                  WriteBlockMarker(writer, blockIndex++);
+                  writer.Write(TileTags);
+
+                  // Tile names block.
+                  ASCIIEncoding ascii = new ASCIIEncoding();
+                  WriteBlockMarker(writer, blockIndex++);
+                  foreach (var name in TileNames)
+                  {
+                     WriteASCIIString(writer, ascii, name);
+                  }
                }
+
+               // Map data block.
+               WriteBlockMarker(writer, blockIndex++);
+               WriteInt16(MapWidth, writer);
+               WriteInt16(MapHeight, writer);
                WriteInt16s(MapData, writer);
             }
          }
@@ -233,6 +311,21 @@ namespace CTM
          }
       }
 
+      static void WriteBlockMarker(BinaryWriter writer, byte blockIndex)
+      {
+         // Block marker (0xDA, 0xBN).
+         writer.Write(0xda);
+         writer.Write(0xb0 + blockIndex);
+      }
+
+      static void WriteASCIIString(BinaryWriter writer, ASCIIEncoding ascii, string name)
+      {
+         byte[] nameBytes = ascii.GetBytes(name);
+
+         writer.Write(nameBytes);
+         writer.Write((byte)0);
+      }
+
       static void ReadInt16s(ref Int16[] result, BinaryReader reader)
       {
          int numElements = result.Length;
@@ -248,6 +341,29 @@ namespace CTM
 
             result[i] = (Int16)((hi << 8) + lo);
          }
+      }
+
+      static string ReadASCIIString(BinaryReader reader, ASCIIEncoding ascii, byte[] nameBytes)
+      {
+         int len = 0;
+         byte letter;
+
+         while ((letter = reader.ReadByte()) != 0)
+         {
+            nameBytes[len] = letter;
+            len++;
+         }
+
+         return ascii.GetString(nameBytes, 0, len);
+      }
+
+      static int ReadBlockMarker(BinaryReader reader)
+      {
+         // Block marker (0xDA, 0xBN).
+         byte da = reader.ReadByte();
+         byte bn = reader.ReadByte();
+
+         return bn - 0xb0;
       }
    }
 }
